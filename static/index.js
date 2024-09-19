@@ -45,7 +45,7 @@ document.getElementById('search-form').addEventListener('submit', async (e) => {
 // 獲取搜索結果函數
 async function fetchSearchResults(query, episode, paged_by, page) {
     try {
-        const response = await fetch('/api/search', {
+        const response = await fetch('https://c8763yee.mooo.com:9527/api/search', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -219,7 +219,7 @@ document.getElementById('frame-form').addEventListener('submit', async (e) => {
     showLoading();
 
     try {
-        const response = await fetch('/api/extract_frame', {
+        const response = await fetch('https://c8763yee.mooo.com:9527/api/extract_frame', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -270,7 +270,7 @@ document.getElementById('gif-form').addEventListener('submit', async (e) => {
     showLoading();
 
     try {
-        const response = await fetch('/api/extract_gif', {
+        const response = await fetch('https://c8763yee.mooo.com:9527/api/extract_gif', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
