@@ -1,0 +1,76 @@
+/* 全局樣式 */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Noto Sans TC', sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* 調整左側欄位和右側顯示區域的高度 */
+#sidebar, #display-area {
+    height: calc(100vh - 56px); /* 減去導航欄高度 */
+    overflow-y: auto;
+}
+
+/* 調整圖片和 GIF 的顯示樣式 */
+#display-area img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+}
+
+/* 調整表格樣式，使其在小屏幕上可滾動 */
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* 美化表格 */
+.table th {
+    cursor: pointer;
+    position: relative;
+}
+
+.table th .sort-icon {
+    margin-left: 5px;
+    font-size: 0.8em;
+}
+
+/* 美化導航欄 */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5em;
+}
+
+/* 調整標籤導航 */
+.nav-tabs .nav-link {
+    padding: 15px;
+    font-size: 1.1em;
+}
+
+/* 美化按鈕 */
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+}
+
+/* 調整滾動條樣式 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 4px;
+}
+
+/* 添加下載按鈕的樣式 */
+.download-button {
+    margin-top: 10px;
+}
+
+/* 成功提示的樣式 */
+.alert-success {
+    margin: 20px;
+    text-align: center;
+}
