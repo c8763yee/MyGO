@@ -85,6 +85,7 @@ function renderTable(data, totalCount) {
                         <th data-column="frame_start">Frame Start <i class="sort-icon"></i></th>
                         <th data-column="frame_end">Frame End <i class="sort-icon"></i></th>
                         <th data-column="segment_id">Segment ID <i class="sort-icon"></i></th>
+                        <th>操作</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -96,6 +97,10 @@ function renderTable(data, totalCount) {
                             <td>${item.frame_start}</td>
                             <td>${item.frame_end}</td>
                             <td>${item.segment_id}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary generate-frame" data-episode="${item.episode}" data-frame="${item.frame_start}">生成畫面</button>
+                                <button class="btn btn-sm btn-outline-primary generate-gif" data-episode="${item.episode}" data-start="${item.frame_start}" data-end="${item.frame_end}">生成GIF</button>
+                            </td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -132,6 +137,15 @@ function renderTable(data, totalCount) {
             currentPage++;
             performSearch();
         }
+    });
+
+    // 添加新按鈕的事件監聽器
+    document.querySelectorAll('.generate-frame').forEach(button => {
+        button.addEventListener('click', handleGenerateFrame);
+    });
+
+    document.querySelectorAll('.generate-gif').forEach(button => {
+        button.addEventListener('click', handleGenerateGif);
     });
 }
 
@@ -300,3 +314,28 @@ document.getElementById('gif-form').addEventListener('submit', async (e) => {
         showError(error.message);
     }
 });
+function handleGenerateFrame(event) {
+    const episode = event.target.getAttribute('data-episode');
+    const frame = event.target.getAttribute('data-frame');
+
+    // 填充 Frame 表單
+    document.getElementById('frame-episode').value = episode;
+    document.getElementById('frame-number').value = frame;
+
+    // 切換到 Frame 標籤
+    document.querySelector('a[href="#frame"]').click();
+}
+
+function handleGenerateGif(event) {
+    const episode = event.target.getAttribute('data-episode');
+    const start = event.target.getAttribute('data-start');
+    const end = event.target.getAttribute('data-end');
+
+    // 填充 GIF 表單
+    document.getElementById('gif-episode').value = episode;
+    document.getElementById('gif-start').value = start;
+    document.getElementById('gif-end').value = end;
+
+    // 切換到 GIF 標籤
+    document.querySelector('a[href="#gif"]').click();
+}
