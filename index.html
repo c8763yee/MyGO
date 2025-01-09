@@ -30,8 +30,8 @@
         <div class="col-md-3 col-sm-12 bg-light" id="sidebar">
           <!-- 標籤導航 -->
           <img
-            src="https://moe-counter.glitch.me/get/@ITHome-Ironman-2024-MyGO!!!!!?theme=moebooru"
-            alt="ITHome-Ironman-2024-MyGO!!!!!"
+            src="https://moe-counter.glitch.me/get/@ITHome-Ironman-2025-MyGO!!!!!?theme=moebooru"
+            alt="ITHome-Ironman-2025-MyGO!!!!!"
           />
           <ul class="nav nav-tabs flex-column" role="tablist">
             <li class="nav-item">
@@ -90,6 +90,16 @@
                   </select>
                 </div>
                 <div class="mb-3">
+                  <label for="search-video_name" class="form-label"
+                    >影片名稱</label
+                  >
+                  <select class="form-select" id="search-video_name">
+                    <option value="" selected>ALL</option>
+                    <option value="Ave Mujica">Ave Mujica</option>
+                    <option value="MyGO">MyGO</option>
+                  </select>
+                </div>
+                <div class="mb-3">
                   <label for="search-paged_by" class="form-label"
                     >每頁顯示數量</label
                   >
@@ -101,16 +111,6 @@
                     min="1"
                     value="20"
                   />
-                </div>
-                <div class="mb-3">
-                  <label for="search-video_name" class="form-label"
-                    >影片名稱</label
-                  >
-                  <select class="form-select" id="search-video_name">
-                    <option value="" selected>ALL</option>
-                    <option value="Ave Mujica">Ave Mujica</option>
-                    <option value="MyGO">MyGO</option>
-                  </select>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">
                   Search
