@@ -1,3 +1,5 @@
+const API_URL = 'https://c8763yee.mooo.com:9527/api';
+// const API_URL = 'http://127.0.0.1:8080/api';
 // 異步處理與錯誤反饋
 function showLoading() {
     const displayArea = document.getElementById('display-area');
@@ -44,13 +46,14 @@ document.getElementById('search-form').addEventListener('submit', async (e) => {
 
 // 獲取搜索結果函數
 async function fetchSearchResults(query, episode, paged_by, page) {
+    const video_name = document.getElementById('search-video_name').value;
     try {
-        const response = await fetch('https://c8763yee.mooo.com:9527/api/search', {
+        const response = await fetch(`${API_URL}/search`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ query, episode, paged_by, nth_page: page })
+            body: JSON.stringify({ query, episode, video_name, paged_by, nth_page: page })
         });
         if (!response.ok) throw new Error('網路錯誤');
 
@@ -75,7 +78,7 @@ async function fetchSearchResults(query, episode, paged_by, page) {
 function renderTable(data, totalCount) {
     const displayArea = document.getElementById('display-area');
     displayArea.innerHTML = `
-        <div class="table-responsive">
+            < div class= "table-responsive" >
             <table class="table table-hover">
                 <thead class="table-primary">
                     <tr>
@@ -85,6 +88,7 @@ function renderTable(data, totalCount) {
                         <th data-column="frame_start">Frame Start <i class="sort-icon"></i></th>
                         <th data-column="frame_end">Frame End <i class="sort-icon"></i></th>
                         <th data-column="segment_id">Segment ID <i class="sort-icon"></i></th>
+                        <th data-column="video_name">Video Name <i class="sort-icon"></i></th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -97,21 +101,22 @@ function renderTable(data, totalCount) {
                             <td>${item.frame_start}</td>
                             <td>${item.frame_end}</td>
                             <td>${item.segment_id}</td>
+                            <td>${item.video_name}</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary generate-frame" data-episode="${item.episode}" data-frame="${item.frame_start}">生成畫面</button>
-                                <button class="btn btn-sm btn-outline-primary generate-gif" data-episode="${item.episode}" data-start="${item.frame_start}" data-end="${item.frame_end}">生成GIF</button>
+                                <button class="btn btn-sm btn-outline-primary generate-frame" data-episode="${item.episode}" data-frame="${item.frame_start}" data-video_name="${item.video_name}">生成畫面</button>
+                                <button class="btn btn-sm btn-outline-primary generate-gif" data-episode="${item.episode}" data-start="${item.frame_start}" data-end="${item.frame_end}" data-video_name="${item.video_name}">生成GIF</button>
                             </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
-        </div>
-        <div class="d-flex justify-content-between align-items-center m-3">
-            <button id="prev-page" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> 上一頁</button>
-            <span>第 ${currentPage} 頁，共 ${Math.ceil(totalCount / parseInt(document.getElementById('search-paged_by').value || 20))} 頁</span>
-            <button id="next-page" class="btn btn-secondary">下一頁 <i class="fas fa-arrow-right"></i></button>
-        </div>
-    `;
+        </div >
+            <div class="d-flex justify-content-between align-items-center m-3">
+                <button id="prev-page" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> 上一頁</button>
+                <span>第 ${currentPage} 頁，共 ${Math.ceil(totalCount / parseInt(document.getElementById('search-paged_by').value || 20))} 頁</span>
+                <button id="next-page" class="btn btn-secondary">下一頁 <i class="fas fa-arrow-right"></i></button>
+            </div>
+        `;
 
     // 添加排序功能
     const headers = displayArea.querySelectorAll('th');
@@ -219,6 +224,12 @@ document.getElementById('frame-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const episode = document.getElementById('frame-episode').value;
     const frame = parseInt(document.getElementById('frame-number').value);
+    const video_name = document.getElementById('frame-video_name').value;
+
+    if (!video_name) {
+        alert('請選擇影片');
+        return;
+    }
 
     if (episode === "") {
         alert('請選擇集數');
@@ -233,16 +244,11 @@ document.getElementById('frame-form').addEventListener('submit', async (e) => {
     showLoading();
 
     try {
-        const response = await fetch('https://c8763yee.mooo.com:9527/api/extract_frame', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ episode, frame })
-        });
+        const response = await fetch(`${API_URL}/frame` + `?episode=${episode}&frame=${frame}&video_name=${video_name}`);
         if (!response.ok) throw new Error('網路錯誤');
 
-        const data = await response.json();
+        const blob = await response.blob();
+        const imageUrl = URL.createObjectURL(blob);
 
         // 顯示成功提示
         const displayArea = document.getElementById('display-area');
@@ -251,9 +257,9 @@ document.getElementById('frame-form').addEventListener('submit', async (e) => {
                 <i class="fas fa-check-circle"></i> 圖片生成成功！
             </div>
             <div class="text-center m-3">
-                <img src="data:image/jpeg;base64,${data.frame}" alt="Frame Image" class="img-fluid rounded">
-                <p class="mt-2">集數：${episode}，幀數：${frame}</p>
-                <a href="data:image/jpeg;base64,${data.frame}" download="frame_${episode}_${frame}.jpg" class="btn btn-primary download-button">
+                <img src="${imageUrl}" alt="Frame Image" class="img-fluid rounded">
+                <p class="mt-2">集數：${episode}，幀數：${frame}，影片：${video_name}</p>
+                <a href="${imageUrl}" download="frame_${episode}_${frame}_${video_name}.jpg" class="btn btn-primary download-button">
                     <i class="fas fa-download"></i> 下載圖片
                 </a>
             </div>
@@ -270,6 +276,12 @@ document.getElementById('gif-form').addEventListener('submit', async (e) => {
     const episode = document.getElementById('gif-episode').value;
     const start = parseInt(document.getElementById('gif-start').value);
     const end = parseInt(document.getElementById('gif-end').value);
+    const video_name = document.getElementById('gif-video_name').value;
+
+    if (!video_name) {
+        alert('請選擇影片');
+        return;
+    }
 
     if (episode === "") {
         alert('請選擇集數');
@@ -284,16 +296,11 @@ document.getElementById('gif-form').addEventListener('submit', async (e) => {
     showLoading();
 
     try {
-        const response = await fetch('https://c8763yee.mooo.com:9527/api/extract_gif', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ episode, start, end })
-        });
+        const response = await fetch(`${API_URL}/gif` + `?episode=${episode}&start=${start}&end=${end}&video_name=${video_name}`);
         if (!response.ok) throw new Error('網路錯誤');
 
-        const data = await response.json();
+        const blob = await response.blob();
+        const gifUrl = URL.createObjectURL(blob);
 
         // 顯示成功提示
         const displayArea = document.getElementById('display-area');
@@ -302,9 +309,9 @@ document.getElementById('gif-form').addEventListener('submit', async (e) => {
                 <i class="fas fa-check-circle"></i> GIF 生成成功！
             </div>
             <div class="text-center m-3">
-                <img src="data:image/gif;base64,${data.gif}" alt="GIF Image" class="img-fluid rounded">
-                <p class="mt-2">集數：${episode}，幀範圍：${start} - ${end}</p>
-                <a href="data:image/gif;base64,${data.gif}" download="gif_${episode}_${start}-${end}.gif" class="btn btn-primary download-button">
+                <img src="${gifUrl}" alt="GIF Image" class="img-fluid rounded">
+                <p class="mt-2">集數：${episode}，幀範圍：${start} - ${end}，影片：${video_name}</p>
+                <a href="${gifUrl}" download="gif_${episode}_${start}-${end}_${video_name}.gif" class="btn btn-primary download-button">
                     <i class="fas fa-download"></i> 下載 GIF
                 </a>
             </div>
@@ -317,10 +324,11 @@ document.getElementById('gif-form').addEventListener('submit', async (e) => {
 function handleGenerateFrame(event) {
     const episode = event.target.getAttribute('data-episode');
     const frame = event.target.getAttribute('data-frame');
-
+    const video_name = event.target.getAttribute('data-video_name');
     // 填充 Frame 表單
     document.getElementById('frame-episode').value = episode;
     document.getElementById('frame-number').value = frame;
+    document.getElementById('frame-video_name').value = video_name;
 
     // 切換到 Frame 標籤
     document.querySelector('a[href="#frame"]').click();
@@ -330,11 +338,12 @@ function handleGenerateGif(event) {
     const episode = event.target.getAttribute('data-episode');
     const start = event.target.getAttribute('data-start');
     const end = event.target.getAttribute('data-end');
-
+    const video_name = event.target.getAttribute('data-video_name');
     // 填充 GIF 表單
     document.getElementById('gif-episode').value = episode;
     document.getElementById('gif-start').value = start;
     document.getElementById('gif-end').value = end;
+    document.getElementById('gif-video_name').value = video_name;
 
     // 切換到 GIF 標籤
     document.querySelector('a[href="#gif"]').click();

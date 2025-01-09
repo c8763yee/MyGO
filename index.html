@@ -74,7 +74,9 @@
                   <label for="search-episode" class="form-label">集數</label>
                   <select class="form-select" id="search-episode">
                     <option value="" selected>ALL</option>
-                    <option value="1-3">1-3</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
                     <option value="4">4</option>
                     <option value="5">5</option>
                     <option value="6">6</option>
@@ -100,6 +102,16 @@
                     value="20"
                   />
                 </div>
+                <div class="mb-3">
+                  <label for="search-video_name" class="form-label"
+                    >影片名稱</label
+                  >
+                  <select class="form-select" id="search-video_name">
+                    <option value="" selected>ALL</option>
+                    <option value="Ave Mujica">Ave Mujica</option>
+                    <option value="MyGO">MyGO</option>
+                  </select>
+                </div>
                 <button type="submit" class="btn btn-primary w-100">
                   Search
                 </button>
@@ -112,7 +124,9 @@
                   <label for="frame-episode" class="form-label">集數</label>
                   <select class="form-select" id="frame-episode" required>
                     <option value="" disabled selected>請選擇集數</option>
-                    <option value="1-3">1-3</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
                     <option value="4">4</option>
                     <option value="5">5</option>
                     <option value="6">6</option>
@@ -135,6 +149,16 @@
                     required
                   />
                 </div>
+                <div class="mb-3">
+                  <label for="frame-video_name" class="form-label"
+                    >影片名稱</label
+                  >
+                  <select class="form-select" id="frame-video_name" required>
+                    <option value="" disabled selected>請選擇影片</option>
+                    <option value="Ave Mujica">Ave Mujica</option>
+                    <option value="MyGO">MyGO</option>
+                  </select>
+                </div>
                 <button type="submit" class="btn btn-primary w-100">
                   提取畫面
                 </button>
@@ -147,7 +171,9 @@
                   <label for="gif-episode" class="form-label">集數</label>
                   <select class="form-select" id="gif-episode" required>
                     <option value="" disabled selected>請選擇集數</option>
-                    <option value="1-3">1-3</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
                     <option value="4">4</option>
                     <option value="5">5</option>
                     <option value="6">6</option>
@@ -179,6 +205,15 @@
                     placeholder="結束幀"
                     required
                   />
+                </div>
+                <div class="mb-3">
+                  <label for="gif-video_name" class="form-label"
+                    >影片名稱</label
+                  >
+                  <select class="form-select" id="gif-video_name" required>
+                    <option value="Ave Mujica">Ave Mujica</option>
+                    <option value="MyGO">MyGO</option>
+                  </select>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">
                   生成 GIF
