@@ -1,4 +1,4 @@
-const API_URL = 'https://c8763yee.mooo.com:9527/api';
+const API_URL = 'https://tomorin.mooo.com:9527/api';
 // const API_URL = 'http://127.0.0.1:8080/api';
 // 異步處理與錯誤反饋
 function showLoading() {
