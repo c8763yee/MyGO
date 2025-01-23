@@ -1,5 +1,5 @@
-const API_URL = 'https://tomorin.mooo.com:9527/api';
-// const API_URL = 'http://127.0.0.1:8080/api';
+// const API_URL = 'https://tomorin.mooo.com:9527/api';
+const API_URL = 'http://192.168.191.52:8080/api';
 // 異步處理與錯誤反饋
 function showLoading() {
     const displayArea = document.getElementById('display-area');
@@ -78,7 +78,7 @@ async function fetchSearchResults(query, episode, paged_by, page) {
 function renderTable(data, totalCount) {
     const displayArea = document.getElementById('display-area');
     displayArea.innerHTML = `
-            < div class= "table-responsive" >
+        <div class="table-responsive">
             <table class="table table-hover">
                 <thead class="table-primary">
                     <tr>
@@ -110,12 +110,12 @@ function renderTable(data, totalCount) {
                     `).join('')}
                 </tbody>
             </table>
-        </div >
-            <div class="d-flex justify-content-between align-items-center m-3">
-                <button id="prev-page" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> 上一頁</button>
-                <span>第 ${currentPage} 頁，共 ${Math.ceil(totalCount / parseInt(document.getElementById('search-paged_by').value || 20))} 頁</span>
-                <button id="next-page" class="btn btn-secondary">下一頁 <i class="fas fa-arrow-right"></i></button>
-            </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center m-3">
+            <button id="prev-page" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> 上一頁</button>
+            <span>第 ${currentPage} 頁，共 ${Math.ceil(totalCount / parseInt(document.getElementById('search-paged_by').value || 20))} 頁</span>
+            <button id="next-page" class="btn btn-secondary">下一頁 <i class="fas fa-arrow-right"></i></button>
+        </div>
         `;
 
     // 添加排序功能
