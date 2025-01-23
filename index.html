@@ -71,6 +71,16 @@
                   />
                 </div>
                 <div class="mb-3">
+                  <label for="search-video_name" class="form-label"
+                    >影片名稱</label
+                  >
+                  <select class="form-select" id="search-video_name">
+                    <option value="" selected>ALL</option>
+                    <option value="Ave Mujica">Ave Mujica</option>
+                    <option value="MyGO">MyGO!!!!!</option>
+                  </select>
+                </div>
+                <div class="mb-3">
                   <label for="search-episode" class="form-label">集數</label>
                   <select class="form-select" id="search-episode">
                     <option value="" selected>ALL</option>
@@ -87,16 +97,6 @@
                     <option value="11">11</option>
                     <option value="12">12</option>
                     <option value="13">13</option>
-                  </select>
-                </div>
-                <div class="mb-3">
-                  <label for="search-video_name" class="form-label"
-                    >影片名稱</label
-                  >
-                  <select class="form-select" id="search-video_name">
-                    <option value="" selected>ALL</option>
-                    <option value="Ave Mujica">Ave Mujica</option>
-                    <option value="MyGO">MyGO</option>
                   </select>
                 </div>
                 <div class="mb-3">
@@ -120,6 +120,16 @@
             <!-- Frame 標籤內容 -->
             <div class="tab-pane fade" id="frame" role="tabpanel">
               <form id="frame-form">
+                <div class="mb-3">
+                  <label for="frame-video_name" class="form-label"
+                    >影片名稱</label
+                  >
+                  <select class="form-select" id="frame-video_name" required>
+                    <option value="" disabled selected>請選擇影片</option>
+                    <option value="Ave Mujica">Ave Mujica</option>
+                    <option value="MyGO">MyGO!!!!!</option>
+                  </select>
+                </div>
                 <div class="mb-3">
                   <label for="frame-episode" class="form-label">集數</label>
                   <select class="form-select" id="frame-episode" required>
@@ -149,16 +159,6 @@
                     required
                   />
                 </div>
-                <div class="mb-3">
-                  <label for="frame-video_name" class="form-label"
-                    >影片名稱</label
-                  >
-                  <select class="form-select" id="frame-video_name" required>
-                    <option value="" disabled selected>請選擇影片</option>
-                    <option value="Ave Mujica">Ave Mujica</option>
-                    <option value="MyGO">MyGO</option>
-                  </select>
-                </div>
                 <button type="submit" class="btn btn-primary w-100">
                   提取畫面
                 </button>
@@ -167,6 +167,15 @@
             <!-- GIF 標籤內容 -->
             <div class="tab-pane fade" id="gif" role="tabpanel">
               <form id="gif-form">
+                <div class="mb-3">
+                  <label for="gif-video_name" class="form-label"
+                    >影片名稱</label
+                  >
+                  <select class="form-select" id="gif-video_name" required>
+                    <option value="Ave Mujica">Ave Mujica</option>
+                    <option value="MyGO">MyGO!!!!!</option>
+                  </select>
+                </div>
                 <div class="mb-3">
                   <label for="gif-episode" class="form-label">集數</label>
                   <select class="form-select" id="gif-episode" required>
@@ -205,15 +214,6 @@
                     placeholder="結束幀"
                     required
                   />
-                </div>
-                <div class="mb-3">
-                  <label for="gif-video_name" class="form-label"
-                    >影片名稱</label
-                  >
-                  <select class="form-select" id="gif-video_name" required>
-                    <option value="Ave Mujica">Ave Mujica</option>
-                    <option value="MyGO">MyGO</option>
-                  </select>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">
                   生成 GIF
