@@ -1,5 +1,5 @@
-// const API_URL = 'https://tomorin.mooo.com:9527/api';
-const API_URL = 'http://192.168.191.52:8080/api';
+const API_URL = 'https://tomorin.mooo.com:9527/api';
+// const API_URL = 'http://192.168.191.52:8080/api';
 // 異步處理與錯誤反饋
 function showLoading() {
     const displayArea = document.getElementById('display-area');
