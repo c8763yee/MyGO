@@ -257,9 +257,12 @@ document.getElementById('frame-form').addEventListener('submit', async (e) => {
                 <i class="fas fa-check-circle"></i> 圖片生成成功！
             </div>
             <div class="text-center m-3">
-                <img src="${imageUrl}" alt="Frame Image" class="img-fluid rounded">
+                <picture>
+                    <source srcset="${imageUrl}" type="image/webp">
+                    <img src="${imageUrl}" alt="Frame Image" class="img-fluid rounded">
+                </picture>
                 <p class="mt-2">集數：${episode}，幀數：${frame}，影片：${video_name}</p>
-                <a href="${imageUrl}" download="frame_${episode}_${frame}_${video_name}.jpg" class="btn btn-primary download-button">
+                <a href="${imageUrl}" download="frame_${episode}_${frame}_${video_name}.webp" class="btn btn-primary download-button">
                     <i class="fas fa-download"></i> 下載圖片
                 </a>
             </div>
@@ -277,6 +280,7 @@ document.getElementById('gif-form').addEventListener('submit', async (e) => {
     const start = parseInt(document.getElementById('gif-start').value);
     const end = parseInt(document.getElementById('gif-end').value);
     const video_name = document.getElementById('gif-video_name').value;
+    const format = document.querySelector('input[name="format"]:checked').value;
 
     if (!video_name) {
         alert('請選擇影片');
@@ -296,23 +300,31 @@ document.getElementById('gif-form').addEventListener('submit', async (e) => {
     showLoading();
 
     try {
-        const response = await fetch(`${API_URL}/gif` + `?episode=${episode}&start=${start}&end=${end}&video_name=${video_name}`);
+        const response = await fetch(`${API_URL}/gif` + `?episode=${episode}&start=${start}&end=${end}&video_name=${video_name}&format=${format}`);
         if (!response.ok) throw new Error('網路錯誤');
 
         const blob = await response.blob();
-        const gifUrl = URL.createObjectURL(blob);
+        const videoUrl = URL.createObjectURL(blob);
+        const fileExtension = format === 'gif' ? 'gif' : 'webm';
+        const mimeType = format === 'gif' ? 'image/gif' : 'video/webm';
 
         // 顯示成功提示
         const displayArea = document.getElementById('display-area');
         displayArea.innerHTML = `
             <div class="alert alert-success" role="alert">
-                <i class="fas fa-check-circle"></i> GIF 生成成功！
+                <i class="fas fa-check-circle"></i> ${format === 'gif' ? 'GIF' : '影片'}生成成功！
             </div>
             <div class="text-center m-3">
-                <img src="${gifUrl}" alt="GIF Image" class="img-fluid rounded">
+                ${format === 'gif'
+                ? `<img src="${videoUrl}" alt="Generated GIF" class="img-fluid rounded">`
+                : `<video autoplay loop muted class="img-fluid rounded">
+                        <source src="${videoUrl}" type="video/webm">
+                        您的瀏覽器不支援 WebM 視頻格式
+                       </video>`
+            }
                 <p class="mt-2">集數：${episode}，幀範圍：${start} - ${end}，影片：${video_name}</p>
-                <a href="${gifUrl}" download="gif_${episode}_${start}-${end}_${video_name}.gif" class="btn btn-primary download-button">
-                    <i class="fas fa-download"></i> 下載 GIF
+                <a href="${videoUrl}" download="animation_${episode}_${start}-${end}_${video_name}.${fileExtension}" class="btn btn-primary download-button">
+                    <i class="fas fa-download"></i> 下載${format === 'gif' ? 'GIF' : '影片'}
                 </a>
             </div>
         `;
