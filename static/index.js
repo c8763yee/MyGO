@@ -6,7 +6,7 @@ const isLocalDevelopment = window.location.protocol === 'file:' || window.locati
 
 // fetch 配置
 const fetchConfig = {
-    production: {
+    development: {
         credentials: 'include',
         mode: 'cors',
         headers: {
@@ -14,10 +14,12 @@ const fetchConfig = {
             'Origin': window.location.origin
         }
     },
-    development: {
+    production: {
+        credentials: 'include',
         mode: 'cors',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Origin': window.location.origin
         }
     }
 };
