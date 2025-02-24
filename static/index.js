@@ -1,5 +1,212 @@
 const API_URL = 'https://tomorin.mooo.com:9527/api';
 // const API_URL = 'http://192.168.191.52:8080/api';
+
+// 判斷是否為本地開發環境
+const isLocalDevelopment = window.location.protocol === 'file:' || window.location.hostname === 'localhost';
+
+// fetch 配置
+const fetchConfig = {
+    production: {
+        credentials: 'include',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json',
+            'Origin': window.location.origin
+        }
+    },
+    development: {
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }
+};
+
+// 獲取當前環境的 fetch 配置
+const getCurrentFetchConfig = (additionalHeaders = {}) => {
+    const baseConfig = isLocalDevelopment ? fetchConfig.development : fetchConfig.production;
+    return {
+        ...baseConfig,
+        headers: {
+            ...baseConfig.headers,
+            ...additionalHeaders
+        }
+    };
+};
+
+// 主題切換功能
+const themeToggle = document.getElementById("theme-toggle");
+const html = document.documentElement;
+const icon = themeToggle.querySelector("i");
+
+// 檢查本地存儲的主題設置
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme) {
+    html.setAttribute("data-bs-theme", savedTheme);
+    icon.className = savedTheme === "dark" ? "fas fa-moon" : "fas fa-sun";
+}
+
+themeToggle.addEventListener("click", () => {
+    const currentTheme = html.getAttribute("data-bs-theme");
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+    html.setAttribute("data-bs-theme", newTheme);
+    icon.className = newTheme === "dark" ? "fas fa-moon" : "fas fa-sun";
+
+    // 保存主題設置到本地存儲
+    localStorage.setItem("theme", newTheme);
+});
+
+// 影片播放器控制
+const videoPlayer = document.getElementById("video-player");
+const playPauseBtn = document.getElementById("play-pause");
+const videoProgress = document.getElementById("video-progress");
+const timeDisplay = document.getElementById("time-display");
+const videoPreview = document.getElementById("video-preview");
+const gifForm = document.getElementById("gif-form");
+const generatedWebmPreview = document.getElementById("generated-webm-preview");
+const generatedVideo = document.getElementById("generated-video");
+const downloadWebmBtn = document.getElementById("download-webm");
+
+// 當選擇影片和集數時顯示預覽
+function updateVideoPreview() {
+    const videoName = document.getElementById("gif-video_name").value;
+    const episode = document.getElementById("gif-episode").value;
+
+    if (videoName && episode) {
+        const videoUrl = `${API_URL}/video/${videoName}/${episode}`;
+        videoPlayer.querySelector("source").src = videoUrl;
+        videoPlayer.load();
+        videoPreview.style.display = "block";
+    } else {
+        videoPreview.style.display = "none";
+    }
+}
+
+// 監聽影片和集數選擇變化
+document
+    .getElementById("gif-video_name")
+    .addEventListener("change", updateVideoPreview);
+document
+    .getElementById("gif-episode")
+    .addEventListener("change", updateVideoPreview);
+
+// 更新開始和結束幀輸入框的最大值
+videoPlayer.addEventListener("loadedmetadata", () => {
+    const totalFrames = Math.floor(videoPlayer.duration * 30); // 假設 30fps
+    document.getElementById("gif-start").max = totalFrames;
+    document.getElementById("gif-end").max = totalFrames;
+    videoProgress.disabled = false;
+});
+
+// 播放/暫停按鈕點擊事件
+playPauseBtn.addEventListener("click", () => {
+    if (videoPlayer.paused) {
+        videoPlayer.play();
+        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+    } else {
+        videoPlayer.pause();
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+    }
+});
+
+// 更新進度條和時間顯示
+videoPlayer.addEventListener("timeupdate", () => {
+    const progress = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+    videoProgress.value = progress;
+
+    const currentMinutes = Math.floor(videoPlayer.currentTime / 60);
+    const currentSeconds = Math.floor(videoPlayer.currentTime % 60);
+    const durationMinutes = Math.floor(videoPlayer.duration / 60);
+    const durationSeconds = Math.floor(videoPlayer.duration % 60);
+
+    timeDisplay.textContent = `${currentMinutes}:${currentSeconds
+        .toString()
+        .padStart(2, "0")} / ${durationMinutes}:${durationSeconds
+            .toString()
+            .padStart(2, "0")}`;
+});
+
+// 進度條拖曳控制
+videoProgress.addEventListener("input", () => {
+    const time = (videoProgress.value / 100) * videoPlayer.duration;
+    videoPlayer.currentTime = time;
+});
+
+// 處理 GIF/WebM 表單提交
+gifForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const format = document.querySelector('input[name="format"]:checked').value;
+    const videoName = document.getElementById("gif-video_name").value;
+    const episode = document.getElementById("gif-episode").value;
+    const start = document.getElementById("gif-start").value;
+    const end = document.getElementById("gif-end").value;
+
+    if (!videoName) {
+        alert('請選擇影片');
+        return;
+    }
+
+    if (episode === "") {
+        alert('請選擇集數');
+        return;
+    }
+
+    if (isNaN(start) || isNaN(end)) {
+        alert('請填寫正確的幀範圍');
+        return;
+    }
+
+    showLoading();
+
+    try {
+        const response = await fetch(`${API_URL}/gif?video_name=${encodeURIComponent(videoName)}&episode=${encodeURIComponent(episode)}&start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}&format=${encodeURIComponent(format)}`, {
+            method: "GET",
+            ...getCurrentFetchConfig()
+        });
+
+        if (!response.ok) throw new Error("生成失敗");
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const fileExtension = format === 'gif' ? 'gif' : 'webm';
+
+        // 顯示成功提示和預覽
+        const displayArea = document.getElementById('display-area');
+        displayArea.innerHTML = `
+            <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle"></i> ${format.toUpperCase()} 生成成功！
+            </div>
+            <div class="text-center m-3">
+                ${format === 'gif'
+                ? `<img src="${url}" alt="Generated GIF" class="img-fluid rounded">`
+                : `<video src="${url}" class="img-fluid rounded" controls autoplay loop></video>`
+            }
+                <p class="mt-2">集數：${episode}，幀範圍：${start} - ${end}，影片：${videoName}</p>
+                <a href="${url}" download="${videoName}_${episode}_${start}-${end}.${fileExtension}" class="btn btn-primary download-button">
+                    <i class="fas fa-download"></i> 下載 ${format.toUpperCase()}
+                </a>
+            </div>
+        `;
+
+        // 清理之前生成的預覽
+        generatedWebmPreview.style.display = "none";
+
+        // 設置下載按鈕
+        downloadWebmBtn.onclick = () => {
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${videoName}_${episode}_${start}-${end}.${fileExtension}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+    } catch (error) {
+        console.error("Error:", error);
+        alert(`生成${format === 'webm' ? 'WebM' : 'GIF'}時發生錯誤`);
+    }
+});
+
 // 異步處理與錯誤反饋
 function showLoading() {
     const displayArea = document.getElementById('display-area');
@@ -50,9 +257,7 @@ async function fetchSearchResults(query, episode, paged_by, page) {
     try {
         const response = await fetch(`${API_URL}/search`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            ...getCurrentFetchConfig(),
             body: JSON.stringify({ query, episode, video_name, paged_by, nth_page: page })
         });
         if (!response.ok) throw new Error('網路錯誤');
@@ -244,7 +449,10 @@ document.getElementById('frame-form').addEventListener('submit', async (e) => {
     showLoading();
 
     try {
-        const response = await fetch(`${API_URL}/frame` + `?episode=${episode}&frame=${frame}&video_name=${video_name}`);
+        const response = await fetch(`${API_URL}/frame` + `?episode=${episode}&frame=${frame}&video_name=${video_name}`, {
+            method: 'GET',
+            ...getCurrentFetchConfig()
+        });
         if (!response.ok) throw new Error('網路錯誤');
 
         const blob = await response.blob();
@@ -273,66 +481,6 @@ document.getElementById('frame-form').addEventListener('submit', async (e) => {
     }
 });
 
-// 處理 GIF 表單提交
-document.getElementById('gif-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const episode = document.getElementById('gif-episode').value;
-    const start = parseInt(document.getElementById('gif-start').value);
-    const end = parseInt(document.getElementById('gif-end').value);
-    const video_name = document.getElementById('gif-video_name').value;
-    const format = document.querySelector('input[name="format"]:checked').value;
-
-    if (!video_name) {
-        alert('請選擇影片');
-        return;
-    }
-
-    if (episode === "") {
-        alert('請選擇集數');
-        return;
-    }
-
-    if (isNaN(start) || isNaN(end)) {
-        alert('請填寫正確的幀範圍');
-        return;
-    }
-
-    showLoading();
-
-    try {
-        const response = await fetch(`${API_URL}/gif` + `?episode=${episode}&start=${start}&end=${end}&video_name=${video_name}&format=${format}`);
-        if (!response.ok) throw new Error('網路錯誤');
-
-        const blob = await response.blob();
-        const videoUrl = URL.createObjectURL(blob);
-        const fileExtension = format === 'gif' ? 'gif' : 'webm';
-        const mimeType = format === 'gif' ? 'image/gif' : 'video/webm';
-
-        // 顯示成功提示
-        const displayArea = document.getElementById('display-area');
-        displayArea.innerHTML = `
-            <div class="alert alert-success" role="alert">
-                <i class="fas fa-check-circle"></i> ${format === 'gif' ? 'GIF' : '影片'}生成成功！
-            </div>
-            <div class="text-center m-3">
-                ${format === 'gif'
-                ? `<img src="${videoUrl}" alt="Generated GIF" class="img-fluid rounded">`
-                : `<video autoplay loop muted class="img-fluid rounded">
-                        <source src="${videoUrl}" type="video/webm">
-                        您的瀏覽器不支援 WebM 視頻格式
-                       </video>`
-            }
-                <p class="mt-2">集數：${episode}，幀範圍：${start} - ${end}，影片：${video_name}</p>
-                <a href="${videoUrl}" download="animation_${episode}_${start}-${end}_${video_name}.${fileExtension}" class="btn btn-primary download-button">
-                    <i class="fas fa-download"></i> 下載${format === 'gif' ? 'GIF' : '影片'}
-                </a>
-            </div>
-        `;
-
-    } catch (error) {
-        showError(error.message);
-    }
-});
 function handleGenerateFrame(event) {
     const episode = event.target.getAttribute('data-episode');
     const frame = event.target.getAttribute('data-frame');
