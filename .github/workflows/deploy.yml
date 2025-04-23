@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
   workflow_dispatch:
 
 jobs:
@@ -22,6 +23,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Copy package.json to MyGO directory
+        run: cp package.json MyGO/
+
+      - name: Set DEPLOY_BRANCH environment variable
+        run: echo "DEPLOY_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
       - name: Build the React app
         run: npm run build
 
@@ -29,4 +36,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
+          publish_dir: ./build/${{ env.DEPLOY_BRANCH }}
