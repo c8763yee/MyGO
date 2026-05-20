@@ -1,5 +1,4 @@
-const API_URL = 'https://tomorin.mooo.com:9527/api';
-// const API_URL = 'http://192.168.191.52:8080/api';
+const API_URL = 'https://mygo-api.c8763yee.qzz.io/api';
 
 // 判斷是否為本地開發環境
 const isLocalDevelopment = window.location.protocol === 'file:' || window.location.hostname === 'localhost';
