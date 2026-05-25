@@ -21,7 +21,6 @@ window.addEventListener('resize', syncSidebar);
 syncSidebar();
 
 const getCurrentFetchConfig = ({ json = false, headers = {} } = {}) => ({
-    credentials: 'include',
     mode: 'cors',
     headers: {
         ...(json ? { 'Content-Type': 'application/json' } : {}),
