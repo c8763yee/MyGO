@@ -141,6 +141,29 @@ body::before {
     margin-bottom: 1rem;
 }
 
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tracking-wider {
+    letter-spacing: 0.08em;
+}
+
+.badge-mygo {
+    background: linear-gradient(135deg, var(--primary-blue), #00a8ff);
+    color: #fff;
+}
+
+.badge-ave {
+    background: linear-gradient(135deg, var(--primary-purple), #6a3eb5);
+    color: #fff;
+}
+
 /* Animations */
 @keyframes fadeInUp {
     from {
@@ -220,8 +243,9 @@ body::before {
 
 /* Hero Section */
 .hero-text {
-    background: linear-gradient(white, #94a3b8);
+    background: linear-gradient(135deg, var(--text-main), var(--accent-color));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: 800;
 }

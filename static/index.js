@@ -20,12 +20,12 @@ function syncSidebar() {
 window.addEventListener('resize', syncSidebar);
 syncSidebar();
 
-const getCurrentFetchConfig = (additionalHeaders = {}) => ({
+const getCurrentFetchConfig = ({ json = false, headers = {} } = {}) => ({
     credentials: 'include',
     mode: 'cors',
     headers: {
-        'Content-Type': 'application/json',
-        ...additionalHeaders
+        ...(json ? { 'Content-Type': 'application/json' } : {}),
+        ...headers
     }
 });
 
@@ -90,33 +90,49 @@ videoPlayer?.addEventListener("loadedmetadata", () => {
     if (videoProgress) videoProgress.disabled = false;
 });
 
+const PLAY_ICON = '<i class="fas fa-play" style="font-size: 0.8rem;"></i>';
+const PAUSE_ICON = '<i class="fas fa-pause" style="font-size: 0.8rem;"></i>';
+
 playPauseBtn?.addEventListener("click", () => {
     if (videoPlayer.paused) {
         videoPlayer.play();
-        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        playPauseBtn.innerHTML = PAUSE_ICON;
     } else {
         videoPlayer.pause();
-        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        playPauseBtn.innerHTML = PLAY_ICON;
     }
 });
 
+videoPlayer?.addEventListener("ended", () => {
+    if (playPauseBtn) playPauseBtn.innerHTML = PLAY_ICON;
+});
+
+videoPlayer?.addEventListener("pause", () => {
+    if (playPauseBtn) playPauseBtn.innerHTML = PLAY_ICON;
+});
+
+videoPlayer?.addEventListener("play", () => {
+    if (playPauseBtn) playPauseBtn.innerHTML = PAUSE_ICON;
+});
+
 videoPlayer?.addEventListener("timeupdate", () => {
-    if (videoProgress) {
-        const progress = (videoPlayer.currentTime / videoPlayer.duration) * 100;
-        videoProgress.value = progress;
+    const duration = videoPlayer.duration;
+    const hasDuration = Number.isFinite(duration) && duration > 0;
+    if (videoProgress && hasDuration) {
+        videoProgress.value = (videoPlayer.currentTime / duration) * 100;
     }
     if (timeDisplay) {
         const currentMin = Math.floor(videoPlayer.currentTime / 60);
         const currentSec = Math.floor(videoPlayer.currentTime % 60);
-        const durationMin = Math.floor(videoPlayer.duration / 60);
-        const durationSec = Math.floor(videoPlayer.duration % 60);
+        const durationMin = hasDuration ? Math.floor(duration / 60) : 0;
+        const durationSec = hasDuration ? Math.floor(duration % 60) : 0;
         timeDisplay.textContent = `${currentMin}:${currentSec.toString().padStart(2, "0")} / ${durationMin}:${durationSec.toString().padStart(2, "0")}`;
     }
 });
 
 videoProgress?.addEventListener("input", () => {
-    const time = (videoProgress.value / 100) * videoPlayer.duration;
-    videoPlayer.currentTime = time;
+    if (!Number.isFinite(videoPlayer.duration) || videoPlayer.duration <= 0) return;
+    videoPlayer.currentTime = (videoProgress.value / 100) * videoPlayer.duration;
 });
 
 // --- 輔助函式 ---
@@ -172,7 +188,7 @@ async function performSearch() {
     try {
         const response = await fetch(`${API_URL}/search`, {
             method: 'POST',
-            ...getCurrentFetchConfig(),
+            ...getCurrentFetchConfig({ json: true }),
             body: JSON.stringify({ ...currentSearchData, nth_page: currentPage })
         });
         if (!response.ok) throw new Error('連線失敗');
@@ -318,8 +334,9 @@ function renderPagination(totalCount) {
 
 function renderPageNumbers(total) {
     let html = '';
-    const start = Math.max(1, currentPage - 2);
-    const end = Math.min(total, start + 4);
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(total, start + 4);
+    start = Math.max(1, end - 4);
     for (let i = start; i <= end; i++) {
         html += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
     }
