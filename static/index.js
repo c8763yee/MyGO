@@ -34,6 +34,18 @@ function escapeHtml(s) {
     }[c]));
 }
 
+function buildUrl(path, params) {
+    const url = new URL(`${API_URL}${path}`);
+    Object.entries(params).forEach(([key, value]) => {
+        url.searchParams.set(key, value);
+    });
+    return url.toString();
+}
+
+function safeFilePart(s) {
+    return String(s).replace(/[^\w.-]+/g, '_').replace(/^_+|_+$/g, '') || 'mygo';
+}
+
 // --- UI 控制 ---
 const themeToggle = document.getElementById("theme-toggle");
 const html = document.documentElement;
@@ -407,30 +419,29 @@ document.getElementById('frame-form')?.addEventListener('submit', async (e) => {
     showLoading();
     document.getElementById('display-title').textContent = `Extracting EP${ep} Frame ${f}...`;
 
-    try {
-        const qs = `episode=${encodeURIComponent(ep)}&frame=${encodeURIComponent(f)}&video_name=${encodeURIComponent(vn)}`;
-        const res = await fetch(`${API_URL}/frame?${qs}`, {
-            method: 'GET', ...getCurrentFetchConfig()
-        });
-        if (!res.ok) throw new Error(`伺服器回應錯誤 (${res.status})`);
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const safeVn = escapeHtml(vn);
+    const url = buildUrl('/frame', { episode: ep, frame: f, video_name: vn });
+    const safeVn = escapeHtml(safeFilePart(vn));
+    const safeEp = escapeHtml(ep);
+    const safeFrame = escapeHtml(f);
 
-        renderMediaResult(`
-            <div class="fade-in text-center p-md-5">
-                <div class="glass-panel d-inline-block p-4 mb-4">
-                    <img src="${url}" class="img-fluid rounded-3 shadow-lg" style="max-height: 70vh">
-                </div>
-                <div>
-                    <a href="${url}" download="frame_${safeVn}_ep${ep}_${f}.webp" class="btn btn-primary btn-lg px-5 shadow">
-                        <i class="fas fa-download me-2"></i>下載圖片
-                    </a>
-                </div>
+    renderMediaResult(`
+        <div class="fade-in text-center p-md-5">
+            <div class="glass-panel d-inline-block p-4 mb-4">
+                <img src="${url}" class="img-fluid rounded-3 shadow-lg" style="max-height: 70vh"
+                     alt="EP${safeEp} Frame ${safeFrame}"
+                     onload="document.getElementById('display-title').textContent = 'Frame Result'"
+                     onerror="showError('圖片載入失敗，請確認集數、幀數與系列是否正確')">
             </div>
-        `);
-        document.getElementById('display-title').textContent = 'Frame Result';
-    } catch (err) { showError(err.message); }
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <a href="${url}" download="frame_${safeVn}_ep${safeEp}_${safeFrame}.webp" class="btn btn-primary btn-lg px-5 shadow">
+                    <i class="fas fa-download me-2"></i>下載圖片
+                </a>
+                <a href="${url}" target="_blank" rel="noopener" class="btn btn-outline-info btn-lg px-4 shadow">
+                    <i class="fas fa-up-right-from-square me-2"></i>開啟原圖
+                </a>
+            </div>
+        </div>
+    `);
 });
 
 // 處理 GIF 表單
@@ -451,31 +462,32 @@ document.getElementById('gif-form')?.addEventListener("submit", async (e) => {
     showLoading();
     document.getElementById('display-title').textContent = 'Generating...';
 
-    try {
-        const qs = `video_name=${encodeURIComponent(vn)}&episode=${encodeURIComponent(ep)}&start=${start}&end=${end}&format=${format}`;
-        const res = await fetch(`${API_URL}/gif?${qs}`, {
-            method: "GET", ...getCurrentFetchConfig()
-        });
-        if (!res.ok) throw new Error(`伺服器回應錯誤 (${res.status})`);
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const safeVn = escapeHtml(vn);
-        const fmtUpper = format.toUpperCase();
+    const url = buildUrl('/gif', { video_name: vn, episode: ep, start, end, format });
+    const safeVn = escapeHtml(safeFilePart(vn));
+    const safeEp = escapeHtml(ep);
+    const safeStart = escapeHtml(start);
+    const safeEnd = escapeHtml(end);
+    const fmtUpper = format.toUpperCase();
 
-        renderMediaResult(`
-            <div class="fade-in text-center p-md-5">
-                <div class="glass-panel d-inline-block p-4 mb-4 bg-black">
-                    ${format === 'gif'
-                        ? `<img src="${url}" class="img-fluid rounded-3">`
-                        : `<video src="${url}" class="img-fluid rounded-3" controls autoplay loop muted playsinline></video>`}
-                </div>
-                <div>
-                    <a href="${url}" download="${safeVn}_ep${ep}_${start}-${end}.${format}" class="btn btn-primary btn-lg px-5 shadow">
-                        <i class="fas fa-download me-2"></i>下載 ${fmtUpper}
-                    </a>
-                </div>
+    renderMediaResult(`
+        <div class="fade-in text-center p-md-5">
+            <div class="glass-panel d-inline-block p-4 mb-4 bg-black">
+                ${format === 'gif'
+                    ? `<img src="${url}" class="img-fluid rounded-3" alt="${fmtUpper} Result"
+                           onload="document.getElementById('display-title').textContent = '${fmtUpper} Result'"
+                           onerror="showError('動畫載入失敗，請確認集數、幀數與系列是否正確')">`
+                    : `<video src="${url}" class="img-fluid rounded-3" controls autoplay loop muted playsinline
+                              onloadeddata="document.getElementById('display-title').textContent = '${fmtUpper} Result'"
+                              onerror="showError('動畫載入失敗，請確認集數、幀數與系列是否正確')"></video>`}
             </div>
-        `);
-        document.getElementById('display-title').textContent = `${fmtUpper} Result`;
-    } catch (err) { showError(err.message); }
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <a href="${url}" download="${safeVn}_ep${safeEp}_${safeStart}-${safeEnd}.${format}" class="btn btn-primary btn-lg px-5 shadow">
+                    <i class="fas fa-download me-2"></i>下載 ${fmtUpper}
+                </a>
+                <a href="${url}" target="_blank" rel="noopener" class="btn btn-outline-info btn-lg px-4 shadow">
+                    <i class="fas fa-up-right-from-square me-2"></i>開啟檔案
+                </a>
+            </div>
+        </div>
+    `);
 });
